@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="htmlRoot">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="pageTitle">نظام التوعية والتدريب في الأمن السيبراني</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- نافذة تسجيل الدخول (ثابتة على الأزرق الداكن دائماً) -->
+    <div id="authGate" class="cyber-modal-overlay">
+        <div class="cyber-auth-card">
+            <div class="card-icon">🔒</div>
+            <h2 data-i18n="loginTitle">تسجيل الدخول إلى النظام</h2>
+            <p class="card-sub" data-i18n="loginSub">الرجاء تسجيل الدخول للمتابعة إلى منصة الأمن السيبراني</p>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label for="emailInput" data-i18n="emailLabel">البريد الإلكتروني</label>
+                    <input type="email" id="emailInput" placeholder="example@gmail.com" autocomplete="email" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="passwordInput" data-i18n="passwordLabel">كلمة المرور</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password" required>
+                        <button type="button" class="eye-btn" onclick="togglePasswordVisibility()">👁️</button>
+                    </div>
+                </div>
+
+                <div id="loginError" class="error-message" style="display: none;" data-i18n="errorMsg">
+                    ⚠️ عذراً، يجب أن ينتهي البريد الإلكتروني بـ @gmail.com
+                </div>
+
+                <button type="submit" class="cyber-btn primary-btn" data-i18n="loginBtn">
+                    دخول للمنصة 🚀
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- القائمة الجانبية العائمة -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <aside id="cyberSidebar" class="cyber-sidebar">
+        <div class="sidebar-header">
+            <h3 data-i18n="sidebarTitle">قائمة التنقل</h3>
+            <button class="close-sidebar" onclick="toggleSidebar()">✕</button>
+        </div>
+        <div class="sidebar-user-info">
+            <span id="sidebarUserText">المستخدم: زائر</span>
+        </div>
+        <ul class="sidebar-links">
+            <li><a href="#" onclick="toggleSidebar()" data-i18n="menuHome">🏠 الرئيسية ولوحة التحكم</a></li>
+            
+            <li class="has-dropdown">
+                <button class="dropdown-btn" onclick="toggleDropdown(this)">
+                    <span data-i18n="menuSettings">🔐 الإعدادات</span>
+                    <span class="arrow-icon">▼</span>
+                </button>
+                <div class="dropdown-container">
+                    <a href="#" onclick="openGeneralSettings(); toggleSidebar();" data-i18n="menuGenSettings">⚙️ الإعدادات العامة</a>
+                    <a href="#" onclick="openUsersManagement(); toggleSidebar();" data-i18n="menuUsers">👥 إدارة المستخدمين</a>
+                </div>
+            </li>
+
+            <li class="sidebar-logout"><a href="#" onclick="handleLogout(); toggleSidebar();" data-i18n="menuLogout">🚪 تسجيل الخروج</a></li>
+        </ul>
+    </aside>
+
+    <!-- نافذة الإعدادات العامة -->
+    <div id="generalSettingsModal" class="sub-modal-overlay" style="display: none;">
+        <div class="sub-modal-card">
+            <div class="sub-modal-header">
+                <h3 data-i18n="settingsModalTitle">⚙️ الإعدادات العامة للنظام</h3>
+                <button onclick="closeGeneralSettings()">✕</button>
+            </div>
+            <div class="settings-body">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h4 data-i18n="themeTitle">الوضع الفاتح</h4>
+                        <p data-i18n="themeDesc">تفعيل المظهر الفاتح للمنصة</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="themeToggleSwitch">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h4 data-i18n="backupTitle">النسخ الاحتياطي التلقائي</h4>
+                        <p data-i18n="backupDesc">حفظ جلسة الدخول وتخطي شاشة الدخول تلقائياً</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="backupToggleSwitch" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+            <button class="primary-btn" onclick="applyAndSaveSettings()" style="margin-top: 20px;" data-i18n="saveBtn">حفظ وإغلاق</button>
+        </div>
+    </div>
+
+    <!-- نافذة إدارة المستخدمين -->
+    <div id="usersModal" class="sub-modal-overlay" style="display: none;">
+        <div class="sub-modal-card wide-card">
+            <div class="sub-modal-header">
+                <h3 data-i18n="usersModalTitle">👥 إدارة المستخدمين والصلاحيات</h3>
+                <button onclick="closeUsersManagement()">✕</button>
+            </div>
+            <div class="users-table-container">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th data-i18n="tableUser">اسم المستخدم</th>
+                            <th data-i18n="tableStatus">الحالة</th>
+                            <th data-i18n="tableAction">الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="tableUsernameCell">admin</td>
+                            <td><span class="status-active" data-i18n="activeStatus">نشط</span></td>
+                            <td><button class="edit-btn" onclick="editCurrentActiveUser()" data-i18n="editBtn">تعديل</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <button class="primary-btn" onclick="closeUsersManagement()" style="margin-top: 20px;" data-i18n="closeBtn">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- المنصة الرئيسية -->
+    <div id="mainDashboard" style="display: none;">
+        <div class="top-controls">
+            <button class="menu-toggle-btn" onclick="toggleSidebar()" aria-label="القائمة">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <button class="lang-switch-btn" onclick="toggleLanguage()">🌐 EN / AR</button>
+        </div>
+
+        <header class="header">
+            <div class="university-header">
+                <div class="logo-box">
+                    <img src="logo.png" alt="شعار الجامعة" class="uni-logo">
+                </div>
+                <div class="info-text">
+                    <h3 data-i18n="uni1">وزارة التعليم العالي والبحث العلمي</h3>
+                    <h4 data-i18n="uni2">جامعة الفرات الأوسط التقنية</h4>
+                    <h4 data-i18n="uni3">كلية البوليتكنك - كربلاء</h4>
+                    <h5 data-i18n="uni4">قسم هندسة تكنولوجيا المعلومات</h5>
+                </div>
+            </div>
+
+            <hr class="header-divider">
+
+            <h1 class="main-title" data-i18n="mainTitle">نظام التوعية والتدريب في الأمن السيبراني</h1>
+            <p class="subtitle" data-i18n="subTitle">منصة رقمية تفاعلية لبناء الوعي الأمني والدفاع السيبراني</p>
+        </header>
+
+        <main class="main-content">
+            <section class="intro-card">
+                <div class="supervision-box">
+                    <p><strong data-i18n="supervisionLabel">👨‍🏫 إشراف:</strong> <span data-i18n="supervisorName">م.م. حسن صلاح</span></p>
+                    <p><strong data-i18n="studentsLabel">👥 إعداد وتنفيذ الطلاب:</strong> <span data-i18n="studentsNames">علي محمد جبار | علي رحمن حسن | علي مرتضى عمار | غدير علاء حمزه | مؤمل سعدي عزيز</span></p>
+                </div>
+                <hr class="supervision-divider">
+
+                <h2 class="centered-title" data-i18n="introHeading">المقدمة</h2>
+                <p class="project-goal" data-i18n="introText">
+                    يأتي هذا المشروع كخطوة استراتيجية متقدمة في مجال أمن المعلومات وحماية البيانات الرقمية في ظل التطور المتسارع للهجمات السيبرانية واستهداف البنى التحتية والمؤسسات والأفراد. يهدف هذا النظام الأساسي إلى نشر ثقافة الوعي السيبراني الشامل، وتعزيز القدرات الدفاعية ضد التهديدات الإلكترونية المتنوعة مثل هجمات التصيد الاحتيالي، الهندسة الاجتماعية، البرمجيات الخبيثة، وأساليب الاختراق المتقدمة. كما يوفر النظام بيئة تعليمية وتدريبية تفاعلية ومحاكاة حية تُمكّن المستخدمين من اكتشاف الثغرات وتطبيق أفضل الممارسات العالمية في إدارة كلمات المرور وتأمين الحسابات الرقمية بكفاءة عالية، ليكون بمثابة حصن رقمي يسهم في بناء مجتمع واعٍ وقادر على مواجهة التحديات التكنولوجية المعاصرة بأمان تام.
+                </p>
+            </section>
+
+            <h2 class="section-heading" data-i18n="modulesHeading">📚 محاور النظام والوحدات التدريبية</h2>
+            <section class="features-grid">
+                <a href="chapter1.html" class="feature-card-link">
+                    <div class="feature-box">
+                        <div class="box-icon">🛡️</div>
+                        <h3 data-i18n="mod1Title">أساسيات الأمن السيبراني</h3>
+                        <p data-i18n="mod1Desc">تعرف على المفاهيم الأساسية، التهديدات والمخاطر الإلكترونية وكيفية تجنبها للحد من الهجمات.</p>
+                    </div>
+                </a>
+                <a href="chapter2.html" class="feature-card-link">
+                    <div class="feature-box">
+                        <div class="box-icon">🎣</div>
+                        <h3 data-i18n="mod2Title">كشف التصيد الاحتيالي</h3>
+                        <p data-i18n="mod2Desc">تمارين عملية لاكتشاف الرسائل المزيفة والروابط المشبوهة قبل الوقوع ضحية للهندسة الاجتماعية.</p>
+                    </div>
+                </a>
+                <a href="chapter3.html" class="feature-card-link">
+                    <div class="feature-box">
+                        <div class="box-icon">🔑</div>
+                        <h3 data-i18n="mod3Title">كلمات المرور والمصادقة</h3>
+                        <p data-i18n="mod3Desc">تعلم كيفية إنشاء كلمات مرور معقدة وتفعيل المصادقة الثنائية (2FA) لحماية حساباتك الحساسة.</p>
+                    </div>
+                </a>
+                <a href="chapter4.html" class="feature-card-link">
+                    <div class="feature-box">
+                        <div class="box-icon">🦠</div>
+                        <h3 data-i18n="mod4Title">البرمجيات الخبيثة وفيروسات الفدية</h3>
+                        <p data-i18n="mod4Desc">فهم آليات عمل الفيروسات المدمرة، ملفات التروجان، وكيفية حماية الأنظمة واستعادة البيانات.</p>
+                    </div>
+                </a>
+                <a href="chapter5.html" class="feature-card-link">
+                    <div class="feature-box">
+                        <div class="box-icon">🌐</div>
+                        <h3 data-i18n="mod5Title">أمن الشبكات وحمايتها</h3>
+                        <p data-i18n="mod5Desc">دراسة جدران الحماية (Firewalls)، تأمين الاتصالات اللاسلكية، وكشف التسلل الرقمي المبكر.</p>
+                    </div>
+                </a>
+                <a href="chapter6.html" class="feature-card-link">
+                    <div class="feature-box">
+                        <div class="box-icon">📂</div>
+                        <h3 data-i18n="mod6Title">حماية البيانات</h3>
+                        <p data-i18n="mod6Desc">تصنيف المعلومات وحفظها ومشاركتها بصورة آمنة ومنع تسريبها.</p>
+                    </div>
+                </a>
+                <a href="chapter7.html" class="feature-card-link">
+                    <div class="feature-box">
+                        <div class="box-icon">💾</div>
+                        <h3 data-i18n="mod7Title">النسخ الاحتياطي</h3>
+                        <p data-i18n="mod7Desc">إعداد النسخ الاحتياطية واختبار استعادة البيانات لمواجهة الحالات الطارئة.</p>
+                    </div>
+                </a>
+                <a href="chapter8.html" class="feature-card-link">
+                    <div class="feature-box">
+                        <div class="box-icon">📱</div>
+                        <h3 data-i18n="mod8Title">أمن الأجهزة</h3>
+                        <p data-i18n="mod8Desc">التحديثات الأمنية ومكافحة البرمجيات الخبيثة وتأمين الأجهزة الشخصية.</p>
+                    </div>
+                </a>
+                <a href="chapter9.html" class="feature-card-link">
+                    <div class="feature-box">
+                        <div class="box-icon">🤖</div>
+                        <h3 data-i18n="mod9Title">الذكاء الاصطناعي والأمن السيبراني</h3>
+                        <p data-i18n="mod9Desc">حماية البيانات عند استخدام أدوات الذكاء الاصطناعي والتعامل مع تقنياته.</p>
+                    </div>
+                </a>
+                <a href="chapter10.html" class="feature-card-link">
+                    <div class="feature-box">
+                        <div class="box-icon">🚨</div>
+                        <h3 data-i18n="mod10Title">الاستجابة للحوادث</h3>
+                        <p data-i18n="mod10Desc">الإبلاغ عن الحوادث الأمنية والتعامل معها بالطرق الصحيحة.</p>
+                    </div>
+                </a>
+                <a href="chapter11.html" class="feature-card-link">
+                    <div class="feature-box">
+                        <div class="box-icon">🏢</div>
+                        <h3 data-i18n="mod11Title">الأمن السيبراني في بيئة العمل</h3>
+                        <p data-i18n="mod11Desc">الالتزام بالسياسات والتعليمات الأمنية المؤسسية بحرفية عالية.</p>
+                    </div>
+                </a>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p data-i18n="footerText">جميع حقوق الطبع والنشر محفوظة © 2027 | نظام التوعية والتدريب في الأمن السيبراني</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
